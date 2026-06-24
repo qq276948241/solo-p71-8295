@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans', Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  line-height: 1.6;
+  font-weight: 400;
+  color: #4a4036;
+  background-color: #FFF8F0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #FFF8F0;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.el-button--primary {
+  --el-button-bg-color: #FF8C42 !important;
+  --el-button-border-color: #FF8C42 !important;
+  --el-button-hover-bg-color: #F57C2E !important;
+  --el-button-hover-border-color: #F57C2E !important;
+  --el-button-active-bg-color: #E06A1C !important;
+  --el-button-active-border-color: #E06A1C !important;
+}
+
+.el-card {
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.el-dialog {
+  border-radius: 16px !important;
+}
+
+.el-input__wrapper {
+  border-radius: 10px !important;
+}
+
+.el-date-editor.el-input__wrapper {
+  border-radius: 10px !important;
+}
