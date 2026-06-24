@@ -1,4 +1,5 @@
 import { ref, computed, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import type { Pet, WeightRecord, VaccineRecord, HealthLog, LogType } from '@/types'
 import { STORAGE_KEYS, getFromStorage, setToStorage, generateId } from '@/utils/storage'
 import { getMockPets, getMockWeights, getMockVaccines, getMockLogs } from '@/utils/mock'
@@ -120,6 +121,83 @@ export function usePetStore() {
     return `${Math.max(months, 0)}个月`
   }
 
+  const buildExportJson = (): string => {
+    return JSON.stringify(
+      {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        pets: pets.value,
+        weights: weights.value,
+        vaccines: vaccines.value,
+        logs: logs.value,
+      },
+      null,
+      2
+    )
+  }
+
+  const exportData = () => {
+    const blob = new Blob([buildExportJson()], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const date = new Date().toISOString().slice(0, 10)
+    a.href = url
+    a.download = `pet-health-backup-${date}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    ElMessage.success('备份文件已下载')
+  }
+
+  const applyImport = (json: string): string => {
+    const data = JSON.parse(json)
+    if (!data || typeof data !== 'object') throw new Error('format')
+    if (Array.isArray(data.pets)) pets.value = data.pets
+    if (Array.isArray(data.weights)) weights.value = data.weights
+    if (Array.isArray(data.vaccines)) vaccines.value = data.vaccines
+    if (Array.isArray(data.logs)) logs.value = data.logs
+    return `已恢复 ${data.pets?.length ?? 0} 只宠物档案`
+  }
+
+  const importData = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json,application/json'
+    input.className = 'hidden'
+    document.body.appendChild(input)
+
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      document.body.removeChild(input)
+      if (!file) return
+
+      try {
+        await ElMessageBox.confirm(
+          '恢复备份会覆盖当前所有数据，确定继续吗？',
+          '确认恢复',
+          {
+            type: 'warning',
+            confirmButtonText: '确认恢复',
+            cancelButtonText: '取消',
+          }
+        )
+        const text = await file.text()
+        const msg = applyImport(text)
+        ElMessage.success(msg)
+      } catch (e) {
+        if (e === 'cancel' || (e as any)?.action === 'cancel') return
+        ElMessage.error(
+          (e as Error)?.message === 'format'
+            ? '文件格式不正确'
+            : 'JSON 解析失败，文件可能已损坏'
+        )
+      }
+    }
+
+    input.click()
+  }
+
   const sortedPets = computed(() => pets.value)
 
   return {
@@ -143,5 +221,7 @@ export function usePetStore() {
     deleteLog,
     hasLogsOnDate,
     calculateAge,
+    exportData,
+    importData,
   }
 }

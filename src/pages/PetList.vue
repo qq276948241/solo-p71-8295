@@ -2,14 +2,25 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Calendar, Trash2 } from 'lucide-vue-next'
+import { Plus, Calendar, Trash2, HardDriveUpload, Download, Upload } from 'lucide-vue-next'
 import { usePetStore } from '@/composables/usePetStore'
 import type { Pet, Species } from '@/types'
 
 const router = useRouter()
-const { pets, addPet, deletePet, calculateAge } = usePetStore()
+const { pets, addPet, deletePet, calculateAge, exportData, importData } = usePetStore()
 
 const dialogVisible = ref(false)
+const backupMenuVisible = ref(false)
+
+const handleExport = () => {
+  backupMenuVisible.value = false
+  exportData()
+}
+
+const handleImport = () => {
+  backupMenuVisible.value = false
+  importData()
+}
 
 const form = reactive({
   name: '',
@@ -110,6 +121,39 @@ const handleDelete = async (pet: Pet, e: Event) => {
             <Calendar class="w-4 h-4" />
             <span class="text-sm">日历</span>
           </button>
+          <div class="relative">
+            <button
+              @click="backupMenuVisible = !backupMenuVisible"
+              class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-white shadow-card text-[#4a4036] hover:bg-cream-50 transition-colors"
+            >
+              <HardDriveUpload class="w-4 h-4" />
+              <span class="text-sm">备份</span>
+            </button>
+            <div
+              v-show="backupMenuVisible"
+              @click="backupMenuVisible = false"
+              class="fixed inset-0 z-20"
+            ></div>
+            <div
+              v-show="backupMenuVisible"
+              class="absolute right-0 top-full mt-2 z-30 w-40 bg-white rounded-xl shadow-card border border-cream-100 py-1 overflow-hidden"
+            >
+              <button
+                @click="handleExport"
+                class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[#4a4036] hover:bg-cream-50 transition-colors text-left"
+              >
+                <Download class="w-4 h-4 text-orange-500" />
+                导出备份
+              </button>
+              <button
+                @click="handleImport"
+                class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[#4a4036] hover:bg-cream-50 transition-colors text-left border-t border-cream-100"
+              >
+                <Upload class="w-4 h-4 text-sage-500" />
+                恢复备份
+              </button>
+            </div>
+          </div>
           <button
             @click="dialogVisible = true"
             class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-orange-500 text-white shadow-soft hover:bg-orange-600 transition-colors"
